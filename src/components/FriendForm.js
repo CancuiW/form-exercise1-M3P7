@@ -16,8 +16,9 @@ export default function FriendForm(props) {
 
   const onChange = evt => {
     /* 🔥 FIX THIS SO IT ALSO WORKS WITH CHECKBOXES */
-    const { name, value } = evt.target
-    change(name, value)
+    const { name, value,checked ,type} = evt.target
+    const valueOfUse=type==='checkbox'?checked:value
+    change(name, valueOfUse)
   }
 
   return (
@@ -26,7 +27,7 @@ export default function FriendForm(props) {
         <h2>Add a Friend</h2>
 
         {/* 🔥 DISABLE THE BUTTON */}
-        <button>submit</button>
+        <button disabled={disabled}>submit</button>
 
         <div className='errors'>
           {/* 🔥 RENDER THE VALIDATION ERRORS HERE */}
@@ -81,10 +82,12 @@ export default function FriendForm(props) {
         {/* ////////// RADIO BUTTONS ////////// */}
         {/* ////////// RADIO BUTTONS ////////// */}
         <label>Single
-
+          <input type='radio' name='civil' value='single' checked={values.civil==='single'} onChange={onChange}/>
+          
         </label>
 
         <label>Married
+          <input type='radio' name='civil' value='married' checked={values.civil === 'married'} onChange={onChange} />
 
         </label>
       </div>
@@ -96,15 +99,16 @@ export default function FriendForm(props) {
         {/* ////////// CHECKBOXES ////////// */}
         {/* ////////// CHECKBOXES ////////// */}
         <label>Hiking
+          <input onChange={onChange} checked={values.hiking} type='checkbox' name='hiking'/>
 
         </label>
 
         <label>Reading
-
+          <input onChange={onChange} checked={values.reading} type='checkbox' name='reading' />
         </label>
 
         <label>Coding
-
+          <input onChange={onChange} checked={values.coding} type='checkbox' name='coding' />
         </label>
       </div>
     </form>

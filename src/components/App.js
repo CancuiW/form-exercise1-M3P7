@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import Friend from './Friend'
 import FriendForm from './FriendForm'
+import axios from 'axios'
+import schema from '../validation/formSchema'
+import * as yup from 'yup';
 // 🔥 STEP 1- CHECK THE ENDPOINTS IN THE README
 // 🔥 STEP 2- FLESH OUT FriendForm.js
 // 🔥 STEP 3- FLESH THE SCHEMA IN ITS OWN FILE
@@ -34,9 +37,7 @@ const initialDisabled = true
 
 
 export default function App() {
-  //////////////// STATES ////////////////
-  //////////////// STATES ////////////////
-  //////////////// STATES ////////////////
+  
   const [friends, setFriends] = useState(initialFriends)          // array of friend objects
   const [formValues, setFormValues] = useState(initialFormValues) // object
   const [formErrors, setFormErrors] = useState(initialFormErrors) // object
@@ -48,19 +49,34 @@ export default function App() {
   const getFriends = () => {
     // 🔥 STEP 5- IMPLEMENT! ON SUCCESS PUT FRIENDS IN STATE
     //    helper to [GET] all friends from `http://buddies.com/api/friends`
+    axios.get('http://buddies.com/api/friends')
+          .then(res=>{
+            setFriends(res.data)
+            console.log(res.data)
+          })
+          .catch(err=>console.error(err))
   }
 
   const postNewFriend = newFriend => {
     // 🔥 STEP 6- IMPLEMENT! ON SUCCESS ADD NEWLY CREATED FRIEND TO STATE
     //    helper to [POST] `newFriend` to `http://buddies.com/api/friends`
     //    and regardless of success or failure, the form should reset
+    axios.post('http://buddies.com/api/friends',newFriend)
+          .then(res=>{
+            setFriends([res.data,...friends])
+          })
+          .catch(err=>console.error(err))
+          .finally(()=>setFormValues(initialFormValues))
   }
 
-  //////////////// EVENT HANDLERS ////////////////
-  //////////////// EVENT HANDLERS ////////////////
-  //////////////// EVENT HANDLERS ////////////////
+ 
   const inputChange = (name, value) => {
     // 🔥 STEP 10- RUN VALIDATION WITH YUP
+    yup.reach(schema,name)
+        .validate(value)
+        .then(()=>setFormErrors({...formErrors,[name]:''}))
+        .catch(err=>setFormErrors({...formErrors,[name]:err.errors[0]}))
+
     setFormValues({
       ...formValues,
       [name]: value // NOT AN ARRAY
@@ -74,8 +90,14 @@ export default function App() {
       role: formValues.role.trim(),
       civil: formValues.civil.trim(),
       // 🔥 STEP 7- WHAT ABOUT HOBBIES?
+      // hiking:formValues.hiking,
+      // reading:formValues.reading,
+      // coding:formValues.coding
+      //!!formValues[x]是将formValues[x]变成boolean eg:!!2-->true   !!false-->false
+      hobbies:['hiking','reading','coding'].filter(x=>!!formValues[x])
     }
     // 🔥 STEP 8- POST NEW FRIEND USING HELPER
+     postNewFriend(newFriend) 
   }
 
   //////////////// SIDE EFFECTS ////////////////
@@ -87,7 +109,8 @@ export default function App() {
 
   useEffect(() => {
     // 🔥 STEP 9- ADJUST THE STATUS OF `disabled` EVERY TIME `formValues` CHANGES
-  }, [])
+    schema.isValid(formValues).then(valid=>setDisabled(!valid))
+  }, [formValues])
 
   return (
     <div className='container'>
